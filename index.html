@@ -69,14 +69,17 @@
       background-color: #000;
       border: none;
       cursor: pointer;
+      
+      /* Set Emoji Size */
       color: white;
+      font-size: 28px; 
       
       /* V-shape cut */
       clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
       
       display: flex;
       justify-content: center;
-      padding-top: 22px; /* Adjust based on icon size */
+      padding-top: 18px; /* Adjusted to center the emoji vertically */
       
       transition: height 0.2s, background-color 0.2s;
     }
@@ -84,13 +87,6 @@
     .ribbon-btn:hover {
       height: 90px;
       background-color: #222;
-    }
-
-    /* Style for the SVG Icon */
-    .ribbon-btn svg {
-      width: 28px;
-      height: 28px;
-      fill: white;
     }
 
     .ribbon-label {
@@ -104,6 +100,7 @@
       pointer-events: none;
       opacity: 0.9;
       color: #fff;
+      text-shadow: 0 1px 2px black; /* Shadow helps text pop */
     }
 
     .a-enter-vr-button { display: none !important; }
@@ -134,9 +131,7 @@
   <div class="ar-ui top-right-panel" id="topPanel">
     <button class="ribbon-btn" id="saveContactBtn" aria-label="Save Contact">
       
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-1 5h-2v-2h2v-2h2v2h2v2h-2v2h-2v-2z"/> 
-        <path d="M3 19h18v2H3zM19 9h-4V3H9v6H5l7 7 7-7z" style="display:none;"/> </svg>
+      💾
       
       <span class="ribbon-label">Save</span>
     </button>
