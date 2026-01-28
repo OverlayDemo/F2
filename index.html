@@ -15,7 +15,6 @@
       background: #000;
     }
 
-    /* --- LOGO (Top Left) --- */
     #logo {
       position: absolute;
       top: 16px;
@@ -24,7 +23,7 @@
       z-index: 100;
     }
 
-    /* --- UI GROUP: HIDDEN INITIALLY --- */
+    /* --- UI CONTROLS --- */
     .ar-ui {
       display: none; /* Controlled by JS */
       z-index: 100;
@@ -55,53 +54,58 @@
     .play-button:active { transform: scale(0.98); }
     .play-button:hover { background-color: #7a17b8; }
 
-
     /* --- TOP RIGHT PANEL (Ribbon) --- */
     .top-right-panel {
       position: absolute;
       top: 0;
-      right: 30px; /* Distance from right edge */
+      right: 30px; 
       filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.5));
     }
 
     .ribbon-btn {
       position: relative;
       width: 50px;
-      height: 80px; /* Slightly longer to look like a bookmark */
+      height: 80px;
       background-color: #000;
       border: none;
       cursor: pointer;
       color: white;
-      font-size: 24px;
       
-      /* V-shape cut at the bottom */
+      /* V-shape cut */
       clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
       
       display: flex;
       justify-content: center;
-      padding-top: 20px; /* Push icon down */
+      padding-top: 22px; /* Adjust based on icon size */
       
-      transition: height 0.2s;
+      transition: height 0.2s, background-color 0.2s;
     }
 
     .ribbon-btn:hover {
-      height: 90px; /* Grow slightly on hover */
+      height: 90px;
       background-color: #222;
+    }
+
+    /* Style for the SVG Icon */
+    .ribbon-btn svg {
+      width: 28px;
+      height: 28px;
+      fill: white;
     }
 
     .ribbon-label {
       position: absolute;
-      bottom: 25px; /* Positioned inside the ribbon above the cut */
+      bottom: 25px;
       width: 100%;
       text-align: center;
       font-size: 9px;
       font-weight: bold;
       text-transform: uppercase;
       pointer-events: none;
-      opacity: 0.8;
+      opacity: 0.9;
+      color: #fff;
     }
 
-    /* --- UTILITIES --- */
     .a-enter-vr-button { display: none !important; }
 
     #toast {
@@ -129,7 +133,11 @@
 
   <div class="ar-ui top-right-panel" id="topPanel">
     <button class="ribbon-btn" id="saveContactBtn" aria-label="Save Contact">
-      📥
+      
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm-1 5h-2v-2h2v-2h2v2h2v2h-2v2h-2v-2z"/> 
+        <path d="M3 19h18v2H3zM19 9h-4V3H9v6H5l7 7 7-7z" style="display:none;"/> </svg>
+      
       <span class="ribbon-label">Save</span>
     </button>
   </div>
@@ -161,7 +169,6 @@
   </a-scene>
 
   <script>
-    // --- CONTACT INFO ---
     const contactInfo = {
       name: "Jewels AI Team",
       phone: "+1234567890",
@@ -174,10 +181,7 @@
     const sceneEl = document.querySelector('a-scene');
     const videoDisplay = document.querySelector('#videoDisplay');
     const videoEl = document.querySelector('#plan1Video');
-    
-    // Select all UI elements with class 'ar-ui' to toggle them together
     const uiElements = document.querySelectorAll('.ar-ui');
-    
     const toggleButton = document.querySelector('#toggleButton');
     const saveContactBtn = document.querySelector('#saveContactBtn');
     const target = document.querySelector('#target1');
@@ -195,16 +199,11 @@
 
     sceneEl.addEventListener('renderstart', () => {
       const comp = sceneEl.querySelector('[mindar-image]');
-      if (comp && comp.components['mindar-image']) {
-        comp.components['mindar-image'].start();
-      }
+      if (comp && comp.components['mindar-image']) comp.components['mindar-image'].start();
     });
 
-    // --- TOGGLE UI VISIBILITY ---
     function setUiVisibility(visible) {
-      uiElements.forEach(el => {
-        el.style.display = visible ? 'block' : 'none';
-      });
+      uiElements.forEach(el => el.style.display = visible ? 'block' : 'none');
     }
 
     target.addEventListener('targetFound', () => {
@@ -218,7 +217,6 @@
       toggleButton.textContent = "▶ Play Video";
     });
 
-    // --- PLAY BUTTON LOGIC ---
     toggleButton.addEventListener('click', async () => {
       if (!isPlaying) {
         videoDisplay.setAttribute('material', 'src', '#plan1Video');
@@ -236,7 +234,6 @@
       }
     });
 
-    // --- SAVE CONTACT LOGIC ---
     saveContactBtn.addEventListener('click', () => {
       const vcard = [
         "BEGIN:VCARD",
