@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JEWELS-AI</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+    }
+
+    #logo {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 100px;
+      z-index: 100;
+    }
+
+    /* --- LAYOUT CONTAINER --- */
+    .button-panel {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none; 
+      z-index: 100;
+      
+      /* Align items horizontally now so the ribbon sits next to play */
+      display: flex;
+      flex-direction: row; 
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --- 1. PLAY BUTTON STYLE --- */
+    .play-button {
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 30px; /* Rounded pill shape */
+      background-color: #5E0F8B;
+      color: #fff;
+      cursor: pointer;
+      min-width: 140px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      height: 50px; /* Fixed height to align with ribbon */
+    }
+
+    /* --- 2. NEW RIBBON SAVE BUTTON STYLE --- */
+    .ribbon-btn {
+      position: relative;
+      width: 50px;  /* Width of the ribbon */
+      height: 70px; /* Height of the ribbon */
+      background-color: #000; /* Black color from your image */
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 24px;
+      
+      /* This creates the V-cut shape at the bottom */
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+      
+      /* Center the icon inside */
+      display: flex;
+      align-items: flex-start; /* Align icon slightly to top */
+      justify-content: center;
+      padding-top: 15px; /* Push icon down a bit */
+      
+      transition: transform 0.2s;
+      filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.5)); /* Shadow for depth */
+    }
+
+    .ribbon-btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Optional: Hover effect */
+    .ribbon-btn:hover {
+      background-color: #333;
+    }
+
+    /* Tooltip text below the ribbon (optional) */
+    .ribbon-label {
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: white;
+      white-space: nowrap;
+      text-shadow: 0 1px 2px black;
+      pointer-events: none;
+    }
+
+    .a-enter-vr-button { display: none !important; }
+
+    #toast {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(5px);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      z-index: 200;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="logo.png" id="logo" alt="JEWELS-AI logo">
+
+  <div class="button-panel" id="planButtons" style="display: none;">
+    
+    <button class="play-button" id="toggleButton">▶ Play Video</button>
+
+    <div style="position: relative;">
+      <button class="ribbon-btn" id="saveContactBtn" aria-label="Save Contact">
+        📥
+      </button>
+      <div class="ribbon-label">Save</div>
+    </div>
+
+  </div>
+
+  <div id="toast">Action Disabled</div>
+
+  <a-scene 
+    mindar-image="imageTargetSrc: ./targets.mind" 
+    color-space="sRGB" 
+    renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+
+    <a-assets>
+      <video id="plan1Video" src="plan1.mp4" playsinline preload="auto" loop crossorigin="anonymous"></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity id="target1" mindar-image-target="targetIndex: 0">
+      <a-plane 
+        id="videoDisplay" 
+        position="0 0 0" 
+        width="1" 
+        height="0.59" 
+        material="src: #plan1Video; shader: flat; side: double">
+      </a-plane>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    // --- CONTACT INFO ---
+    const contactInfo = {
+      name: "Jewels AI Team",
+      phone: "+1234567890",
+      email: "info@jewels-ai.com",
+      website: "https://www.jewels-ai.com",
+      title: "AI Specialist",
+      org: "JEWELS-AI"
+    };
+
+    const sceneEl = document.querySelector('a-scene');
+    const videoDisplay = document.querySelector('#videoDisplay');
+    const videoEl = document.querySelector('#plan1Video');
+    const buttonsContainer = document.querySelector('#planButtons');
+    const toggleButton = document.querySelector('#toggleButton');
+    const saveContactBtn = document.querySelector('#saveContactBtn');
+    const target = document.querySelector('#target1');
+    const toast = document.querySelector('#toast');
+
+    let isPlaying = false;
+
+    function showToast(msg, t = 2000) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, t);
+    }
+
+    videoEl.setAttribute('playsinline', '');
+
+    // MindAR Start
+    sceneEl.addEventListener('renderstart', () => {
+      const comp = sceneEl.querySelector('[mindar-image]');
+      if (comp && comp.components['mindar-image']) {
+        comp.components['mindar-image'].start();
+      }
+    });
+
+    // Show/Hide Buttons on Target Found/Lost
+    target.addEventListener('targetFound', () => {
+      buttonsContainer.style.display = 'flex';
+    });
+
+    target.addEventListener('targetLost', () => {
+      buttonsContainer.style.display = 'none';
+      if (!videoEl.paused) videoEl.pause();
+      isPlaying = false;
+      toggleButton.textContent = "▶ Play Video";
+    });
+
+    // Play Logic
+    toggleButton.addEventListener('click', async () => {
+      if (!isPlaying) {
+        videoDisplay.setAttribute('material', 'src', '#plan1Video');
+        try {
+          await videoEl.play();
+          isPlaying = true;
+          toggleButton.textContent = "⏸ Pause";
+        } catch (err) {
+          showToast('Tap screen to allow video');
+        }
+      } else {
+        videoEl.pause();
+        isPlaying = false;
+        toggleButton.textContent = "▶ Play Video";
+      }
+    });
+
+    // Save Logic
+    saveContactBtn.addEventListener('click', () => {
+      const vcard = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        `FN:${contactInfo.name}`,
+        `ORG:${contactInfo.org}`,
+        `TITLE:${contactInfo.title}`,
+        `TEL;TYPE=WORK,VOICE:${contactInfo.phone}`,
+        `EMAIL:${contactInfo.email}`,
+        `URL:${contactInfo.website}`,
+        "END:VCARD"
+      ].join("\n");
+
+      const blob = new Blob([vcard], { type: "text/vcard" });
+      const url = URL.createObjectURL(blob);
+      const newLink = document.createElement('a');
+      newLink.download = `${contactInfo.name.replace(" ", "_")}.vcf`;
+      newLink.href = url;
+      newLink.click();
+      URL.revokeObjectURL(url);
+      
+      showToast("Saving Contact...", 2000);
+    });
+
+    // Basic protections
+    document.addEventListener("contextmenu", (e) => { e.preventDefault(); });
+  </script>
+</body>
+</html>
